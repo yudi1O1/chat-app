@@ -1,0 +1,17 @@
+server folder setup
+--------------------
+1. npm init and enter three times
+2. download packages
+    -npm i express mongoose nodemon bcrypt(password incruption) cors(server and clint joining) dotenv(url protection) socket.io(chat purposes) 
+
+mongodb = 'mongodb+srv://uddeshyar11asnkvb:99password99@cluster0.nmqxlcp.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
+3. npm install buffer (for the images)
+
+
+
+
+clint folder setup
+-------------------
+
+1. npm add axios styled-components react-router-dom
+2. npm i react-icons
