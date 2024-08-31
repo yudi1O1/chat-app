@@ -8,7 +8,9 @@ const bycript = require("bcrypt");
 router.post("/register", async (req, res) => {
  
   try {
-    const { username, email, password } = req.query;
+    const { username, email, password } = req.body;
+    console.log(username);
+    
     const user = await User.findOne({ username });
       const userEmail = await User.findOne({ email });
       //if username exist
@@ -83,7 +85,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-///setAvatar
+///setAvatar 
 
 router.post("/setavatar/:id", async (req, res) => {
   try {

@@ -32,16 +32,17 @@ function Register() {
     event.preventDefault();
     
     if (handleValidation()) {
-
+   
+      
       const { password, confermPassword, username, email } = values;
+      
       const { data } = await axios.post(registerRoute, values);
-      console.log(data);
       if (data.success === false) {
         toast.error(data.message,toastOption)
       }
       if (data.success === true) {
         localStorage.setItem('chat-app-user', JSON.stringify(data.res))
-        navigate("/login")
+        navigate("/setavatar")
       }
       
 
@@ -72,7 +73,7 @@ function Register() {
   const handleChange = (e) => {
     setValue({...values,[e.target.name]:e.target.value})
   };
-
+ 
 
 
 ///ui design

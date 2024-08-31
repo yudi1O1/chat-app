@@ -349,28 +349,22 @@ span{
       font-size: 1.1rem;
       border-radius: 1rem;
       color: white;
-   
-
-
     }
 
   }
   .sended{
-    justify-content: flex-end;
+    justify-content: flex-start;
     .content{
       background-color: #5959e9;
     }
   }
 
   .recieved{
-    justify-content: flex-start;
+    justify-content: flex-end;
     .content{
       background-color: #3a3af6;
     }
   }
-
-
-
 }
 
 /* /logout */

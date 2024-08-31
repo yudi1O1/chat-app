@@ -4,32 +4,18 @@ import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import axios from "axios";
 import { sendMessageRoute, getAllMessageRoute } from "../utils/Api.Routes";
-import { io } from "socket.io-client";
+import {v4 as uuidv4} from "uuid"
 
 function ChatContainer({ currentChat, currentUser, socket }) {
   const [messages, setMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef()
 
-  // useEffect(() => {
-  //   let response
-  //   const fetch = async () => {
 
-  //   console.log(currentUser._id,currentChat._id,);
-  //     response = await axios.get(getAllMessageRoute, {
-  //       from: currentUser._id,
-  //       to: currentChat._id,
-  //     });
-  //     console.log(response);
-  //   };
-  //   fetch();
-  //   // setMessages(response.data);
-  // }, [currentChat]);
 
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        console.log(currentUser._id, currentChat._id);
         const response = await axios.get(getAllMessageRoute, {
           params: {
             from: currentUser._id,
@@ -45,46 +31,51 @@ function ChatContainer({ currentChat, currentUser, socket }) {
     if (currentChat) {
       fetchMessages();
     }
-  }, [currentChat]);
+  }, [currentChat]); ///
 
 
   async function handleSendMsg(msg) {
-    await axios.post(sendMessageRoute, {
-      messages: msg,
-      from: currentUser._id,
-      to: currentChat._id,
-    });
-    // socket.current.emit("send-msg", {
-    //   messages: msg,
-    //   from: currentUser._id,
-    //   to: currentChat._id,
-    // });
-    // const msgs = [...messages]
-    // msg.push({ fromSelf: true, messsage: msg })
-    // setMessages(msgs); 
-    
-                 
+    try {
+      await axios.post(sendMessageRoute, {
+        messages: msg,
+        from: currentUser._id,
+        to: currentChat._id,
+      });
+      socket.current.emit("send-msg", {
+        message: msg,
+        from: currentUser._id,
+        to: currentChat._id,
+      });
+      const msgs = [...messages];
+      msgs.push({ fromSelf: true, message: msg });
+      setMessages(msgs);
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
+  }
   
-  };
 
-  // useEffect(() => {
+  useEffect(() => {
  
-  //   if (socket.current) {
+    if (socket.current) {
     
-  //     socket.current.on("msg-recieve", (msg) => {
-  //       setArrivalMessage({ fromSelf: false, message: msg });
-  //     });
-  //   }
-  // }, []);  
+      socket.current.on("msg-recieve", (msg) => {
+        console.log({msg});
+        setArrivalMessage({ fromSelf: false, message: msg });
+      });
+    }
+  }, []);  
 
 
-  // useEffect(() => {
-  //   arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
-  // }, [arrivalMessage]);
+  useEffect(() => {
+    arrivalMessage && setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage]);
 
-  // useEffect(() => {
-  //   scrollRef.current?.scrollIntoView({ behavior: "smooth" });
-  // }, [messages]);
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+
   return (
     <>
       {currentChat && (
@@ -106,7 +97,7 @@ function ChatContainer({ currentChat, currentUser, socket }) {
             <div className="chat-messages">
               {messages.map((msg) => {
                 return (
-                  <div>
+                  <div ref={scrollRef} key={uuidv4()}>
                     <div
                       className={`message ${
                         msg.fromSelf ? " sended" : "recieved"

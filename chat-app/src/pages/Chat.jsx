@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { allUsersRoute, host } from "../utils/Api.Routes";
 import Contact from "../components/Contact";
 import Welcome from "../components/Welcome";
@@ -8,8 +8,8 @@ import ChatContainer from "../components/ChatContainer";
 import { io } from "socket.io-client";
 
 function Chat() {
-  const navigate = useNavigate();
   const socket = useRef();
+  const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [currentUser, setCurrentUser] = useState(undefined);
   const [currentChat, setCurrentChat] = useState(undefined);
@@ -28,16 +28,16 @@ function Chat() {
     fetch();
   }, []);
 
-  // useEffect(() => {
-  //   console.log(currentUser);
+  useEffect(() => {
+    console.log(currentUser);
 
-  //   if (currentUser) {
-  //     socket.current = io(host);
-  //     socket.current.emit("add-user", currentUser._id);
-  //   } else {
-  //     console.log("nahi chal rha");
-  //   }
-  // }, [currentUser]);
+    if (currentUser) {
+      socket.current = io(host);
+      socket.current.emit("add-user", currentUser._id);
+    } else {
+      console.log("nahi chal rha");
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const fetchh = async () => {
@@ -51,7 +51,7 @@ function Chat() {
       }
     };
     fetchh();
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   const handleChatChange = (chat) => {
     console.log(chat);
@@ -73,7 +73,7 @@ function Chat() {
           <ChatContainer
             currentChat={currentChat}
             currentUser={currentUser}
-            socker={socket}
+            socket={socket}
           />
         )}
       </div>
