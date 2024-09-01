@@ -100,10 +100,11 @@ function ChatContainer({ currentChat, currentUser, socket }) {
                   <div ref={scrollRef} key={uuidv4()}>
                     <div
                       className={`message ${
-                        msg.fromSelf ? " sended" : "recieved"
+                        msg.fromSelf ? "sended" : "recieved"
                       }`}
                     >
                       <div className="content">
+                        
                         <p>{msg.message}</p>
                       </div>
                     </div>

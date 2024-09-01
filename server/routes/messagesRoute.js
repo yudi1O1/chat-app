@@ -26,29 +26,6 @@ router.post("/addmsg/", async (req, res) => {
   }
 });
 
-// router.get("/getmsg", async (req, res) => {
-//   console.log('aaya');
-//     try {
-//       //logic for showing all data
-//       const { from, to } = req.body;
-//       console.log(from,to);
-//       const messages = Messages.find({
-//         users: {
-//           $all: [from, to],
-//         }}).sort({ updatedAt: 1 });
-//         const projectMessages = messages.map((msg) => {
-//             return {
-//                 fromSelf: msg.sender.toString() === from,
-//                 message: msg.message.text,
-//             };
-//         });
-//         res.send(projectMessages)
-//     } catch (error) {
-//       return res.send({
-//           message:error.message
-//         })
-//     }
-// })
 
 router.get("/getmsg", async (req, res) => {
   try {
@@ -65,7 +42,7 @@ router.get("/getmsg", async (req, res) => {
 
     const projectMessages = messages.map((msg) => {
       return {
-        fromSelf: msg.sender.toString() === from,
+        fromSelf: msg.sender.toString() === to,
         message: msg.message.text,
       };
     });
