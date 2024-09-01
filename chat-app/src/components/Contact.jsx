@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Logo from "../assets/logo.svg";
+import Logo from "../assets/1chat.png";
 
 function Contact({ contacts, currentUser,changeChat }) {
   const [currentUserName, setCurrentUserName] = useState(undefined);
@@ -23,11 +23,10 @@ function Contact({ contacts, currentUser,changeChat }) {
         <div className="contact-container">
           <div className="brands">
             <img src={Logo} alt="logo" />
-            <h3>snappy</h3>
+            <h3>one-chat</h3>
           </div>
           <div className="contacts">
             {contacts.map((contact, index) => {
-              {/* console.log(contact); */}
               return (
                 <div
                   key={contact._id}

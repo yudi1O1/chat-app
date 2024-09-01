@@ -1,19 +1,23 @@
 /* /Register page */
 @import url('https://fonts.googleapis.com/css2?family=Danfo&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Tilt+Prism&display=swap');
 
 
 :root {
-  --contactGreen: #203421;
-  --chatGreen: #306837d3;
+  --contactGreen: #006241;
+  --chatGreen: #002c1df2;
   --borderGreen: #ffffff;
-  --contact:rgba(255, 255, 255, 0.17);
+  --contact:rgba(255, 255, 255, 0.147);
   --contactBorder:rgba(151, 185, 148, 0.559);
   --slctChat:#709775;
-  --slctBdr:#65d06a;
-  --send:#365a3a;
-  --recive:#57ae3d;
-  --btns:#203421
-  
+  --slctBdr:#348838;
+  --send:#169b49de;
+  --recive:#1e4214c5;
+  --btns:#006241;
+  --formBorder:green;
+  --buttonBack: #2c774d;
+  --formBack:#2E8B57;
+  --btnText:#22ac22;
 }
 
 
@@ -25,30 +29,29 @@
     justify-content:center;
     gap:1rem;
     align-items:center;
-    background-color: #131324;
+    background-color: var(--contactGreen);
 }
   
 .brand{
 display:flex;
 align-items: center;
-gap:1rem;
 justify-content:center;
 color: white;
 letter-spacing: 1px;
 padding: 0rem 0rem 1rem 0rem ;
-font-family: "Danfo", serif;
+font-family: "Tilt Prism", sans-serif;
 }
 
 .brandLogo{
-    width: 3rem;
+    width: 7vh;
 }
+
 .form{
     display: flex;
     flex-direction: column;
     align-items: center;
-    background-color: #19192d;
     padding: 3rem 3rem;
-    background-color: #00000076;
+    background-color:var(--chatGreen);
     border-radius: 2rem;
     text-transform: capitalize;
 }
@@ -59,16 +62,15 @@ font-family: "Danfo", serif;
     gap: 2rem;
     padding: .5rem;
     color: white;
-    /* background-color: #fff; */
 }
 .form input{
     background-color: transparent;
     padding: .8rem;
-    border: solid .1rem #4e0eff;
+    border: solid .1rem var(--formBorder);
     color: white;
     text-transform: capitalize;
     &:focus{
-        border: rgb(0, 94, 255) 2px solid;
+        border: rgb(14, 241, 82) .1rem solid;
         outline: none;
         background:transparent;
     }
@@ -78,28 +80,29 @@ font-family: "Danfo", serif;
 .registerButton{
 
     border-radius: 1rem;
-    border:#4e0eff solid;
+    border:var(--slctBdr) solid;
     padding: 1rem;
-    color:#4e0eff;
+    color:var(--btnText);
     font-size: 1rem;
     text-transform: capitalize;
     margin: 2rem;
     width: 100%;
-    background-color: white;
+    background-color: rgba(255, 255, 255, 0.826);
     transition:all.3s ease-in-out;
     font-weight: bold;
 
     &:hover{
-        background-color: #4e0eff;
+        background-color: var(--buttonBack);
         transform: scale(.96);
         color: white;
+        border: solid rgb(14, 241, 82);
     }
 }
 
 .rspan{
     color: white;
     a{
-        color: #825bee;
+        color: var(--btnText);
         text-decoration: none;
         text-transform: uppercase;
         font-weight: bold;
@@ -116,7 +119,7 @@ font-family: "Danfo", serif;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background-color: #19192d;
+    background-color:var(--chatGreen);
     height: 100vh;
     gap: 3rem;
 
@@ -142,9 +145,9 @@ font-family: "Danfo", serif;
 .setprofilebtn{
 
     border-radius: 1rem;
-    border:#4e0eff solid;
+    border:var(--btnText) solid;
     padding: 1rem;
-    color:#4e0eff;
+    color:var(--btnText);
     font-size: 1rem;
     text-transform: capitalize;
     margin: 2rem;
@@ -153,7 +156,7 @@ font-family: "Danfo", serif;
     font-weight: bold;
 
     &:hover{
-        background-color: #4e0eff;
+        background-color: var(--buttonBack);
         transform: scale(.96);
         color: white;
     }
@@ -165,7 +168,7 @@ font-family: "Danfo", serif;
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #808086;
+    background-color: var(--chatGreen);
     height: 100vh;
     gap: 3rem;
     
@@ -203,14 +206,14 @@ font-family: "Danfo", serif;
     .brands {
       display: flex;
       align-items: center;
-      gap: 1rem;
       justify-content: center;
       img {
-        height: 2rem;
+        height: 3rem;
       }
       h3 {
         color: white;
-        text-transform: uppercase;
+        font-family: "Tilt Prism", sans-serif;
+        font-size: 2.3vw;
       }
     }
 }
@@ -292,13 +295,13 @@ font-family: "Danfo", serif;
     display: flex;
     align-items: center;
     flex-direction: column;
-    background-color: #080420;
+    background-color: #06230b;
     color: rgba(255, 255, 255, 0.466);
     
 }
 span{
     text-transform: capitalize;
-    color: #8a69e6
+    color: var(--btnText)
     
 }
 
@@ -420,9 +423,7 @@ span{
         align-items: center;
         width: 90%;
         position: relative;
-        /* background-color: #080420; */
 
-        
         input{
             width: 100%;
             border-radius: 0 1.5rem;
