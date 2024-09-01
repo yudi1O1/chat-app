@@ -25,7 +25,8 @@ mongoose
     console.log(error.message);
   });
 
-const server = app.listen(8080, () => {
+const port = process.env.port||8080
+const server = app.listen(port, () => {
   console.log("server running");
 });
 
