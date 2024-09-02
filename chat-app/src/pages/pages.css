@@ -179,6 +179,7 @@ font-family: "Tilt Prism", sans-serif;
   display: flex;
     height: 100vh;
     width: 100vw;
+    background: #000;
     display: flex;
     flex-direction: column;
     justify-content: center;
