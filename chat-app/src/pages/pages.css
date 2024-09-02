@@ -185,7 +185,7 @@ font-family: "Tilt Prism", sans-serif;
     justify-content: center;
     gap: 1rem;
     align-items: center;
-    .container {
+    &.container {
       height: 100vh;
       width: 100vw;
       display: grid;
