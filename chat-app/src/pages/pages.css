@@ -177,15 +177,14 @@ font-family: "Tilt Prism", sans-serif;
 /* /chat */
 .mainContainer{
   display: flex;
-    /* height: 100vh;
-    width: 100vw; */
-    background: #000;
+    height: 100vh;
+    width: 100vw;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 1rem;
     align-items: center;
-    &.container {
+    .container {
       height: 100vh;
       width: 100vw;
       display: grid;
@@ -212,7 +211,7 @@ font-family: "Tilt Prism", sans-serif;
       align-items: center;
       justify-content: center;
       img {
-        height: 4rem;
+        height: 3rem;
       }
       h3 {
         color: white;
