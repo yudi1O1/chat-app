@@ -189,9 +189,9 @@ font-family: "Tilt Prism", sans-serif;
       width: 100vw;
       display: grid;
       grid-template-columns: 2.5fr 7fr;
-      /* @media screen and (min-width: 720px) and (max-width: 1080px) {
+      @media screen and (min-width: 720px) and (max-width: 1080px) {
         grid-template-columns: 35% 65%;
-      } */
+      }
     }
 }
 
