@@ -1,4 +1,4 @@
-this is a basic chat app by the name one-chat 
+This is a basic chat app by the name one-chat 
 App Link: https://chat-app-seven-gamma-54.vercel.app/login 
 
 Deployed
