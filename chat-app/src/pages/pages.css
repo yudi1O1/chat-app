@@ -211,8 +211,9 @@ font-family: "Tilt Prism", sans-serif;
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 1rem;
       img {
-        height: 3rem;
+        height: 4rem;
       }
       h3 {
         color: white;
