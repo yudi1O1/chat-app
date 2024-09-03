@@ -1,5 +1,5 @@
 This is a basic chat app by the name one-chat 
-App Link: https://chat-app-seven-gamma-54.vercel.app/login 
+App Link: https://chat-app-one-ecru.vercel.app/login
 
 Deployed
 ---------

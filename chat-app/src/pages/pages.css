@@ -184,6 +184,7 @@ font-family: "Tilt Prism", sans-serif;
     justify-content: center;
     gap: 1rem;
     align-items: center;
+    background-color: #080420;
     .container {
       height: 100vh;
       width: 100vw;
