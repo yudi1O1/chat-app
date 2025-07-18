@@ -2,16 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./pages.css";
 import loader from "../assets/loader.gif";
-import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
-import "react-toastify/dist/ReactToastify.css"; //toastify css file
-import { Buffer } from "buffer";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { setAvatarRoute } from "../utils/Api.Routes";
 
 function SetAvatar() {
-  const proxy = "https://cors-anywhere.herokuapp.com/";
-
-  const api = "https://api.multiavatar.com/45678945";
   const navigate = useNavigate();
   const [avatars, setAvatars] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,54 +17,50 @@ function SetAvatar() {
     position: "bottom-right",
     autoClose: 8080,
     pauseOnHover: true,
-    dragable: true,
+    draggable: true,
     theme: "dark",
   };
-  //if no user present
-  if (!localStorage.getItem("chat-app-user")) {
-    navigate("/login");
-  }
+
+  useEffect(() => {
+    if (!localStorage.getItem("chat-app-user")) {
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const setProfilePicture = async () => {
     if (selectedAvatar === undefined) {
-      toast.error("please select a profile picture", toastOption);
+      toast.error("Please select a profile picture", toastOption);
     } else {
       const user = await JSON.parse(localStorage.getItem("chat-app-user"));
-      const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
-        image: avatars[selectedAvatar],
-      });
-      console.log(data);
-      if (data.isSet) {
-        user.isAvatarImageSet = true;
-        user.avatarImage = data.image;
-        localStorage.setItem("chat-app-user", JSON.stringify(user));
-        navigate("/");
-      } else {
-        toast.error("Error setting avatar. Please try again.", toastOption);
+      try {
+        const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
+          image: avatars[selectedAvatar], // Send image URL
+        });
+
+        if (data.isSet) {
+          user.isAvatarImageSet = true;
+          user.avatarImage = data.image;
+          localStorage.setItem("chat-app-user", JSON.stringify(user));
+          navigate("/");
+        } else {
+          toast.error("Error setting avatar. Please try again.", toastOption);
+        }
+      } catch (err) {
+        toast.error("Failed to set profile picture", toastOption);
+        console.error(err);
       }
     }
   };
 
   useEffect(() => {
-    const fetchAvatars = async () => {
-      const data = [];
-      try {
-        for (let i = 0; i < 4; i++) {
-          const response = await axios.get(
-            `${proxy}https://api.multiavatar.com/${Math.round(
-              Math.random() * 1000
-            )}`,
-            { responseType: "arraybuffer" }
-          );
-          const buffer = Buffer.from(response.data, "binary");
-          data.push(buffer.toString("base64"));
-        }
-        setAvatars(data);
-      } catch (error) {
-        console.error("Error fetching avatars:", error);
-      } finally {
-        setIsLoading(false);
+    const fetchAvatars = () => {
+      const avatarList = [];
+      for (let i = 0; i < 4; i++) {
+        const seed = Math.round(Math.random() * 1000);
+        avatarList.push(`https://api.multiavatar.com/${seed}`);
       }
+      setAvatars(avatarList);
+      setIsLoading(false);
     };
 
     fetchAvatars();
@@ -94,7 +86,7 @@ function SetAvatar() {
                 }`}
                 onClick={() => setSelectedAvatar(index)}
               >
-                <img src={`data:image/svg+xml;base64,${avatar}`} alt="avatar" />
+                <img src={avatar} alt={`avatar-${index}`} />
               </div>
             ))}
           </div>
