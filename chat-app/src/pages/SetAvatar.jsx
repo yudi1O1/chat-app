@@ -9,6 +9,8 @@ import axios from "axios";
 import { setAvatarRoute } from "../utils/Api.Routes";
 
 function SetAvatar() {
+  const proxy = "https://cors-anywhere.herokuapp.com/";
+
   const api = "https://api.multiavatar.com/45678945";
   const navigate = useNavigate();
   const [avatars, setAvatars] = useState([]);
@@ -37,10 +39,10 @@ function SetAvatar() {
       });
       console.log(data);
       if (data.isSet) {
-        user.isAvatarImageSet = true
+        user.isAvatarImageSet = true;
         user.avatarImage = data.image;
-        localStorage.setItem('chat-app-user', JSON.stringify(user));
-        navigate("/")
+        localStorage.setItem("chat-app-user", JSON.stringify(user));
+        navigate("/");
       } else {
         toast.error("Error setting avatar. Please try again.", toastOption);
       }
@@ -53,8 +55,10 @@ function SetAvatar() {
       try {
         for (let i = 0; i < 4; i++) {
           const response = await axios.get(
-            `${api}/${Math.round(Math.random() * 1000)}`,
-            { responseType: "arraybuffer" } // Ensure correct response type
+            `${proxy}https://api.multiavatar.com/${Math.round(
+              Math.random() * 1000
+            )}`,
+            { responseType: "arraybuffer" }
           );
           const buffer = Buffer.from(response.data, "binary");
           data.push(buffer.toString("base64"));
