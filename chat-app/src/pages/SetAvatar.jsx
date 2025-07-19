@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "./pages.css";
 import loader from "../assets/loader.gif";
 import { ToastContainer, toast } from "react-toastify";
@@ -34,7 +34,7 @@ function SetAvatar() {
       const user = await JSON.parse(localStorage.getItem("chat-app-user"));
       try {
         const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
-          image: avatars[selectedAvatar], // Send image URL
+          image: avatars[selectedAvatar], // Send avatar URL
         });
 
         if (data.isSet) {
@@ -56,8 +56,9 @@ function SetAvatar() {
     const fetchAvatars = () => {
       const avatarList = [];
       for (let i = 0; i < 4; i++) {
-        const seed = Math.round(Math.random() * 1000);
-        avatarList.push(`https://api.multiavatar.com/${seed}`);
+        const seed = Math.floor(Math.random() * 1000000); // Large random seed
+        const avatarUrl = `https://api.multiavatar.com/${seed}`;
+        avatarList.push(avatarUrl);
       }
       setAvatars(avatarList);
       setIsLoading(false);
