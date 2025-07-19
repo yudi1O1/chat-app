@@ -56,8 +56,8 @@ function SetAvatar() {
     const fetchAvatars = () => {
       const avatarList = [];
       for (let i = 0; i < 4; i++) {
-        const seed = Math.floor(Math.random() * 1000000); // Large random seed
-        const avatarUrl = `https://api.multiavatar.com/${seed}`;
+        // const seed = Math.floor(Math.random() * 1000000); // Large random seed
+        const avatarUrl = `https://api.multiavatar.com/45678945/584`;
         avatarList.push(avatarUrl);
       }
       setAvatars(avatarList);
