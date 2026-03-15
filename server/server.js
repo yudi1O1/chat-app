@@ -1,69 +1,147 @@
-// server.js
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const userRoute = require("./routes/userRoutes");
 const messageRoute = require("./routes/messagesRoute");
+const User = require("./model/userModel");
 const { Server } = require("socket.io");
 require("dotenv").config();
 
 const app = express();
+const onlineUsers = new Map();
+const DEFAULT_PORT = 8080;
+const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:3000";
 
-// Middleware
-app.use(cors());
+app.disable("x-powered-by");
+app.use(
+  cors({
+    origin: CLIENT_ORIGIN,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use("/api/auth", userRoute);
 app.use("/api/messages", messageRoute);
-
-// MongoDB connection
-mongoose
-  .connect(process.env.mongo_url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => console.log("DB connection successful"))
-  .catch((err) => console.log("DB connection error:", err.message));
-
-// Start server
-const port = process.env.port || 8080;
-const server = app.listen(port, () => console.log(`Server running on port ${port}`));
-
-// Socket.IO setup
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000",
-    credentials: true,
-  },
+app.get("/health", (_req, res) => {
+  res.status(200).json({ ok: true });
 });
 
-// Track online users
-global.onlineUsers = new Map();
+app.use((err, _req, res, _next) => {
+  console.error("Unhandled application error:", err);
+  res.status(500).json({
+    success: false,
+    message: "Internal server error",
+  });
+});
 
-io.on("connection", (socket) => {
-  console.log("New user connected:", socket.id);
+function getPort() {
+  const parsedPort = Number(process.env.port || process.env.PORT || DEFAULT_PORT);
+  return Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : DEFAULT_PORT;
+}
 
-  // Add user to online users map
-  socket.on("add-user", (userId) => {
-    onlineUsers.set(userId, socket.id);
-    console.log("Online users:", onlineUsers);
+async function startServer() {
+  if (!process.env.mongo_url) {
+    throw new Error("Missing required environment variable: mongo_url");
+  }
+
+  await mongoose.connect(process.env.mongo_url);
+  console.log("DB connection successful");
+
+  const port = getPort();
+  const server = app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
   });
 
-  // Send message to recipient
-  socket.on("send-msg", (data) => {
-    const sendUserSocket = onlineUsers.get(data.to); // 'to' is recipient's userId
-    if (sendUserSocket) {
-      socket.to(sendUserSocket).emit("msg-receive", data.message);
-    }
+  server.on("error", (error) => {
+    console.error("Server failed to start:", error.message);
+    process.exit(1);
   });
 
-  // Remove user from map on disconnect
-  socket.on("disconnect", () => {
-    for (let [userId, socketId] of onlineUsers) {
-      if (socketId === socket.id) {
-        onlineUsers.delete(userId);
-        break;
+  const io = new Server(server, {
+    cors: {
+      origin: CLIENT_ORIGIN,
+      credentials: true,
+    },
+  });
+
+  const broadcastOnlineUsers = () => {
+    io.emit("online-users", Array.from(onlineUsers.keys()));
+  };
+
+  io.on("connection", (socket) => {
+    console.log("New user connected:", socket.id);
+
+    socket.on("add-user", async (userId) => {
+      if (typeof userId !== "string" || !userId.trim()) {
+        return;
       }
-    }
-    console.log("User disconnected:", socket.id);
+
+      onlineUsers.set(userId, socket.id);
+      socket.data.userId = userId;
+      broadcastOnlineUsers();
+
+      try {
+        await User.findByIdAndUpdate(userId, {
+          lastSeen: new Date(),
+        });
+      } catch (error) {
+        console.error("Failed to update user presence:", error.message);
+      }
+    });
+
+    socket.on("send-msg", (data = {}) => {
+      const { to, message, from } = data;
+      if (typeof to !== "string" || !to.trim()) {
+        return;
+      }
+
+      if (typeof message !== "string" || !message.trim()) {
+        return;
+      }
+
+      const recipientSocketId = onlineUsers.get(to);
+      if (recipientSocketId) {
+        const payload = { from, message };
+        socket.to(recipientSocketId).emit("msg-receive", payload);
+        socket.to(recipientSocketId).emit("msg-recieve", payload);
+      }
+    });
+
+    socket.on("disconnect", async () => {
+      for (const [userId, socketId] of onlineUsers.entries()) {
+        if (socketId === socket.id) {
+          onlineUsers.delete(userId);
+          break;
+        }
+      }
+
+      if (socket.data.userId) {
+        try {
+          await User.findByIdAndUpdate(socket.data.userId, {
+            lastSeen: new Date(),
+          });
+        } catch (error) {
+          console.error("Failed to update last seen:", error.message);
+        }
+      }
+
+      broadcastOnlineUsers();
+
+      console.log("User disconnected:", socket.id);
+    });
   });
+}
+
+process.on("unhandledRejection", (error) => {
+  console.error("Unhandled promise rejection:", error);
+});
+
+process.on("uncaughtException", (error) => {
+  console.error("Uncaught exception:", error);
+  process.exit(1);
+});
+
+startServer().catch((error) => {
+  console.error("Startup failed:", error.message);
+  process.exit(1);
 });

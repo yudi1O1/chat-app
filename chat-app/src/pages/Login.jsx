@@ -2,11 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 // import styled from "styled-components";
 import Logo from "../assets/1chat.png";
-import "./pages.css";
+import "./pagesStyles.css";
 import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { loginRoute } from "../utils/Api.Routes";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 
 function Login() {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ function Login() {
     password: "",
     confermPassword: "",
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   const toastOption = {
     position: "bottom-right",
@@ -29,21 +31,33 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    // alert("form");
     if (handleValidation()) {
-      const { password, email } = values;
-      const { data } = await axios.post(loginRoute, {
-        email,
-        password,
-      });
-      console.log(data);
-      if (data.success === false) {
-        toast.error(data.message,toastOption)
-      }
-      if (data.success === true) {
-        console.log({data});
-        localStorage.setItem('chat-app-user', JSON.stringify(data.res))
-        navigate("/")
+      try {
+        const { password, email } = values;
+        const { data } = await axios.post(loginRoute, {
+          email,
+          password,
+        });
+
+        if (data.success === false) {
+          toast.error(data.message, toastOption);
+        }
+
+        if (data.success === true) {
+          localStorage.setItem("chat-app-user", JSON.stringify(data.user));
+          navigate("/");
+        }
+      } catch (error) {
+        console.error("Login request failed:", {
+          message: error.message,
+          url: error.config?.url,
+          response: error.response?.data,
+        });
+
+        toast.error(
+          error.response?.data?.message || "Unable to connect to the server",
+          toastOption
+        );
       }
     }
   };
@@ -91,12 +105,22 @@ function Login() {
               name="email"
               onChange={(e) => handleChange(e)}
             />
-            <input
-              type="password"
-              placeholder="Password"
-              name="password"
-              onChange={(e) => handleChange(e)}
-            />
+            <div className="passwordField">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password"
+                name="password"
+                onChange={(e) => handleChange(e)}
+              />
+              <button
+                type="button"
+                className="passwordToggle"
+                onClick={() => setShowPassword((prev) => !prev)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+              </button>
+            </div>
           </div>
           <button type="submit" className="registerButton">
             Login

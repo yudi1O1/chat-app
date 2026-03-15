@@ -1,18 +1,51 @@
 import React, { useState, useEffect, useRef } from "react";
-import Logout from "./Logout";
 import ChatInput from "./ChatInput";
 import axios from "axios";
 import { sendMessageRoute, getAllMessageRoute } from "../utils/Api.Routes";
-import { v4 as uuidv4 } from "uuid";
+import DefaultAvatar from "../assets/default-avatar.svg";
+import { IoChevronBack } from "react-icons/io5";
 
-function ChatContainer({ currentChat, currentUser, socket }) {
+function formatPresence(currentChat, isRecipientOnline) {
+  if (!currentChat) {
+    return "";
+  }
+
+  if (isRecipientOnline) {
+    return "Online";
+  }
+
+  if (currentChat.settings?.lastSeenVisibility === "nobody") {
+    return "Last seen hidden";
+  }
+
+  if (!currentChat.lastSeen) {
+    return "Offline";
+  }
+
+  const lastSeenDate = new Date(currentChat.lastSeen);
+  return `Last seen ${lastSeenDate.toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })}`;
+}
+
+function ChatContainer({
+  currentChat,
+  currentUser,
+  socket,
+  onBack,
+  onMessageSent,
+  isRecipientOnline,
+}) {
   const [messages, setMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef();
 
   useEffect(() => {
     const fetchMessages = async () => {
-      if (!currentChat) return;
+      if (!currentChat || !currentUser?._id) return;
       try {
         const response = await axios.get(getAllMessageRoute, {
           params: { from: currentUser._id, to: currentChat._id },
@@ -29,7 +62,7 @@ function ChatContainer({ currentChat, currentUser, socket }) {
     if (!msg.trim()) return;
     try {
       await axios.post(sendMessageRoute, {
-        message: msg,
+        messages: msg,
         from: currentUser._id,
         to: currentChat._id,
       });
@@ -39,18 +72,37 @@ function ChatContainer({ currentChat, currentUser, socket }) {
         to: currentChat._id,
       });
       setMessages((prev) => [...prev, { fromSelf: true, message: msg }]);
+      onMessageSent?.(currentChat._id);
     } catch (error) {
       console.error("Error sending message:", error);
     }
   };
 
   useEffect(() => {
-    if (socket.current) {
-      socket.current.on("msg-recieve", (msg) => {
-        setArrivalMessage({ fromSelf: false, message: msg });
-      });
+    const activeSocket = socket.current;
+    if (activeSocket) {
+      const handleMessageReceive = (payload) => {
+        const nextMessage = typeof payload === "string" ? payload : payload?.message;
+        const fromUserId = typeof payload === "object" ? payload?.from : currentChat?._id;
+
+        if (fromUserId && currentChat?._id && fromUserId !== currentChat._id) {
+          onMessageSent?.(fromUserId);
+          return;
+        }
+
+        setArrivalMessage({ fromSelf: false, message: nextMessage });
+        onMessageSent?.(fromUserId || currentChat?._id);
+      };
+
+      activeSocket.on("msg-receive", handleMessageReceive);
+      activeSocket.on("msg-recieve", handleMessageReceive);
+
+      return () => {
+        activeSocket.off("msg-receive", handleMessageReceive);
+        activeSocket.off("msg-recieve", handleMessageReceive);
+      };
     }
-  }, [socket]);
+  }, [socket, currentChat, onMessageSent]);
 
   useEffect(() => {
     if (arrivalMessage) {
@@ -75,34 +127,40 @@ function ChatContainer({ currentChat, currentUser, socket }) {
   return (
     <>
       {currentChat && (
-        <div className="chat-container">
-          {/* Chat Header */}
-          <div className="chat-header">
-            <div className="user-details">
-              <div className="avatar">
-                <img src={currentChat.avatarImage} alt="profile pic" />
+        <section className="chat-panel">
+          <div className="chat-panel__header">
+            <div className="chat-panel__title">
+              <button type="button" className="chat-back-button" onClick={onBack}>
+                <IoChevronBack />
+              </button>
+              <div className="avatar avatar--chat">
+                <img src={currentChat.avatarImage || DefaultAvatar} alt="profile pic" />
               </div>
-              <div className="username">{currentChat.username}</div>
+              <div className="chat-panel__identity">
+                <h2>{currentChat.username}</h2>
+                <p>{formatPresence(currentChat, isRecipientOnline)}</p>
+              </div>
             </div>
-            <Logout />
           </div>
 
-          {/* Chat Messages */}
-          <div className="chat-messages">
-            {messages.map((msg) => (
-              <div ref={scrollRef} key={uuidv4()}>
+          <div className="chat-panel__messages">
+            {messages.map((msg, index) => (
+              <div
+                ref={scrollRef}
+                className={`chat-message-row ${msg.fromSelf ? "outgoing" : "incoming"}`}
+                key={`${msg.fromSelf}-${msg.message}-${index}`}
+              >
                 <div
-                  className={`message ${msg.fromSelf ? "sended" : "recieved"}`}
+                  className={`chat-bubble ${msg.fromSelf ? "sended" : "recieved"}`}
                 >
-                  <div className="content">{renderMessageContent(msg)}</div>
+                  <div className="chat-bubble__content">{renderMessageContent(msg)}</div>
                 </div>
               </div>
             ))}
           </div>
 
-          {/* Chat Input */}
           <ChatInput handleSendMsg={handleSendMsg} />
-        </div>
+        </section>
       )}
     </>
   );

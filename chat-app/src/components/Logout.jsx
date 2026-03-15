@@ -1,5 +1,4 @@
 import React from 'react';
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
 import { BiPowerOff } from 'react-icons/bi';
 
@@ -10,9 +9,9 @@ function Logout() {
         navigate("login")
     }
     return (
-        <div className="power-container" onClick={()=>{handleClick()}}>
+        <button type="button" className="logout-button" onClick={()=>{handleClick()}}>
             <BiPowerOff/>
-      </div>
+      </button>
     
   )
 }

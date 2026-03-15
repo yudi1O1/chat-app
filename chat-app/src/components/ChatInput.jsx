@@ -27,27 +27,25 @@ function ChatInput({ handleSendMsg }) {
   };
 
   return (
-    <div className="text-container">
-      {/* Emoji picker */}
-      <div className="emoji">
+    <div className="chat-input-bar">
+      <div className="chat-input-bar__emoji">
         <BsEmojiSmileFill onClick={toggleEmojiPicker} />
         {showEmojiPicker && (
           <Picker onEmojiClick={handleEmojiClick} className="picker" />
         )}
       </div>
 
-      {/* Single-line input */}
-      <form className="input-container" onSubmit={sendChat}>
+      <form className="chat-input-bar__form" onSubmit={sendChat}>
         <input
           type="text"
-          placeholder="type your message here"
+          placeholder="Type a message"
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
         />
-        <button className="submit" type="submit">
-          <IoMdSend />
-        </button>
       </form>
+      <button className="chat-input-bar__send" type="button" aria-label="Send message" onClick={sendChat}>
+        <IoMdSend />
+      </button>
     </div>
   );
 }

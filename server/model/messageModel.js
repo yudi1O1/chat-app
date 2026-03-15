@@ -5,10 +5,17 @@ const messageSchema = mongoose.Schema(
     message: {
       text: { type: String, required: true },
     },
-    users: Array, 
+    users: {
+      type: [mongoose.Schema.Types.ObjectId],
+      required: true,
+      validate: {
+        validator: (value) => Array.isArray(value) && value.length === 2,
+        message: "A message must contain exactly two users",
+      },
+    },
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Users",
       required: true,
     },
   },
