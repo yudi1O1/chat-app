@@ -29,7 +29,12 @@ async function startServer() {
     cors: createCorsOptions(),
   });
 
-  console.log(`Socket.IO enabled for origins: ${getAllowedOrigins().join(", ")}`);
+  const allowedOrigins = getAllowedOrigins();
+  console.log(
+    `Socket.IO enabled for origins: ${
+      Array.isArray(allowedOrigins) ? allowedOrigins.join(", ") : allowedOrigins
+    }`
+  );
 
   const broadcastOnlineUsers = () => {
     io.emit("online-users", Array.from(onlineUsers.keys()));

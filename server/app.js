@@ -20,16 +20,33 @@ function getAllowedOrigins() {
     .filter(Boolean);
 }
 
+function isAllowedOrigin(origin, allowedOrigins) {
+  if (!origin) {
+    return true;
+  }
+
+  if (allowedOrigins === "*") {
+    return true;
+  }
+
+  if (allowedOrigins.includes(origin)) {
+    return true;
+  }
+
+  try {
+    const { hostname } = new URL(origin);
+    return hostname === "localhost" || hostname.endsWith(".vercel.app");
+  } catch (_error) {
+    return false;
+  }
+}
+
 function createCorsOptions() {
   const allowedOrigins = getAllowedOrigins();
 
   return {
     origin(origin, callback) {
-      if (allowedOrigins === "*") {
-        return callback(null, true);
-      }
-
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (isAllowedOrigin(origin, allowedOrigins)) {
         return callback(null, true);
       }
 
@@ -72,4 +89,5 @@ module.exports = {
   app,
   createCorsOptions,
   getAllowedOrigins,
+  isAllowedOrigin,
 };
