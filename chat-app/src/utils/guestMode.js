@@ -46,11 +46,23 @@ const guestContacts = [
 
 const defaultGuestMessages = {
   "guest-contact-1": [
-    { fromSelf: false, message: "Hey there! Welcome to guest mode." },
-    { fromSelf: true, message: "Nice, I just wanted to explore the chat app." },
+    {
+      fromSelf: false,
+      message: "Hey there! Welcome to guest mode.",
+      createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
+    },
+    {
+      fromSelf: true,
+      message: "Nice, I just wanted to explore the chat app.",
+      createdAt: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
+    },
   ],
   "guest-contact-2": [
-    { fromSelf: false, message: "You can try chats, settings, and avatars here." },
+    {
+      fromSelf: false,
+      message: "You can try chats, settings, and avatars here.",
+      createdAt: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
+    },
   ],
 };
 
@@ -118,9 +130,13 @@ export function getGuestMessages(contactId) {
 
 export function addGuestMessage(contactId, message) {
   const messages = readJson(GUEST_MESSAGES_STORAGE_KEY, defaultGuestMessages);
+  const normalizedMessage = {
+    ...message,
+    createdAt: message.createdAt || new Date().toISOString(),
+  };
   const nextMessages = {
     ...messages,
-    [contactId]: [...(messages[contactId] || []), message],
+    [contactId]: [...(messages[contactId] || []), normalizedMessage],
   };
   writeJson(GUEST_MESSAGES_STORAGE_KEY, nextMessages);
   const conversations = buildGuestConversations(nextMessages);
@@ -142,11 +158,12 @@ export function buildGuestConversations(
       return {
         ...contact,
         lastMessage: lastMessage.message,
-        updatedAt: new Date().toISOString(),
+        updatedAt: lastMessage.createdAt || new Date().toISOString(),
         fromSelf: Boolean(lastMessage.fromSelf),
       };
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
 }
 
 export function getGuestConversations() {

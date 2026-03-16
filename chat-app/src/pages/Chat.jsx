@@ -162,7 +162,11 @@ function Chat() {
   const recentContacts = conversations.map((conversation) => ({
     ...conversation,
     isOnline: onlineUsers.includes(conversation._id),
-  }));
+  })).sort((left, right) => {
+    const leftTime = left.updatedAt ? new Date(left.updatedAt).getTime() : 0;
+    const rightTime = right.updatedAt ? new Date(right.updatedAt).getTime() : 0;
+    return rightTime - leftTime;
+  });
 
   if (!isLoaded || (currentUser?.isAvatarImageSet && isChatDataLoading)) {
     return <ChatSkeleton />;
