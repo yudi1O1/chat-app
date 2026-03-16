@@ -4,7 +4,11 @@ const userRoute = require("./routes/userRoutes");
 const messageRoute = require("./routes/messagesRoute");
 
 function getAllowedOrigins() {
-  const configuredOrigins = process.env.CLIENT_ORIGIN || process.env.CLIENT_ORIGINS;
+  const configuredOrigins =
+    process.env.CLIENT_ORIGIN ||
+    process.env.CLIENT_ORIGINS ||
+    process.env.FRONTEND_URL ||
+    process.env.FRONTEND_ORIGIN;
 
   if (!configuredOrigins) {
     return ["http://localhost:3000"];
@@ -35,6 +39,7 @@ const app = express();
 
 app.disable("x-powered-by");
 app.use(cors(createCorsOptions()));
+app.options("*", cors(createCorsOptions()));
 app.use(express.json());
 
 app.use("/api/auth", userRoute);
@@ -45,6 +50,13 @@ app.get("/health", (_req, res) => {
 });
 
 app.use((err, _req, res, _next) => {
+  if (err.message === "Not allowed by CORS") {
+    return res.status(403).json({
+      success: false,
+      message: "CORS blocked this request. Check CLIENT_ORIGINS on the backend.",
+    });
+  }
+
   console.error("Unhandled application error:", err);
   res.status(500).json({
     success: false,

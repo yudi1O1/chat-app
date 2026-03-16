@@ -6,7 +6,7 @@ import "./pagesStyles.css";
 import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { registerRoute } from "../utils/Api.Routes";
+import { apiConfigurationError, registerRoute } from "../utils/Api.Routes";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 
 function Register() {
@@ -34,6 +34,11 @@ function Register() {
     event.preventDefault();
 
     if (handleValidation()) {
+      if (apiConfigurationError) {
+        toast.error(apiConfigurationError, toastOption);
+        return;
+      }
+
       try {
         const { data } = await axios.post(registerRoute, values);
 

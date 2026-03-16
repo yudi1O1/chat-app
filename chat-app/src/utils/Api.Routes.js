@@ -1,20 +1,29 @@
 function getApiHost() {
   const configuredHost = process.env.REACT_APP_API_URL?.trim();
   if (configuredHost) {
-    return configuredHost.replace(/\/+$/, "");
+    return {
+      host: configuredHost.replace(/\/+$/, ""),
+      error: null,
+    };
   }
 
   if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
-    console.error(
-      "Missing REACT_APP_API_URL. Set it to your backend URL before deploying the frontend."
-    );
-    return window.location.origin;
+    return {
+      host: "",
+      error: "Missing REACT_APP_API_URL. Set it to your Render backend URL in Vercel project settings.",
+    };
   }
 
-  return "http://localhost:8080";
+  return {
+    host: "http://localhost:8080",
+    error: null,
+  };
 }
 
-export const host = getApiHost();
+const apiConfig = getApiHost();
+
+export const host = apiConfig.host;
+export const apiConfigurationError = apiConfig.error;
 
 export const isSocketEnabled =
   process.env.REACT_APP_ENABLE_SOCKET === "true" ||

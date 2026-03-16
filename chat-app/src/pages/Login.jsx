@@ -6,7 +6,7 @@ import "./pagesStyles.css";
 import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
-import { loginRoute } from "../utils/Api.Routes";
+import { apiConfigurationError, loginRoute } from "../utils/Api.Routes";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
 
 function Login() {
@@ -32,6 +32,11 @@ function Login() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (handleValidation()) {
+      if (apiConfigurationError) {
+        toast.error(apiConfigurationError, toastOption);
+        return;
+      }
+
       try {
         const { password, email } = values;
         const { data } = await axios.post(loginRoute, {
