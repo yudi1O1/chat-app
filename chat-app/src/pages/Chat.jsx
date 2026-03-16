@@ -15,6 +15,11 @@ import "./pagesStyles.css";
 import SettingsPanel from "../components/SettingsPanel";
 import AddChatPanel from "../components/AddChatPanel";
 import ChatSkeleton from "../components/ChatSkeleton";
+import {
+  ensureGuestState,
+  getGuestContacts,
+  getGuestConversations,
+} from "../utils/guestMode";
 
 function Chat() {
   const socket = useRef();
@@ -35,7 +40,15 @@ function Chat() {
         navigate("/login");
         console.log("false");
       } else {
-        setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")));
+        const storedUser = await JSON.parse(localStorage.getItem("chat-app-user"));
+        if (storedUser?.isGuest) {
+          const guestState = ensureGuestState();
+          setCurrentUser(guestState.user);
+          setAllContacts(guestState.contacts);
+          setConversations(guestState.conversations);
+        } else {
+          setCurrentUser(storedUser);
+        }
         console.log("current user loaded");
         setIsLoaded(true);
       }
@@ -49,7 +62,7 @@ function Chat() {
   };
 
   useEffect(() => {
-    if (currentUser && isSocketEnabled) {
+    if (currentUser && isSocketEnabled && !currentUser.isGuest) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
 
@@ -71,6 +84,14 @@ function Chat() {
     const fetchChatData = async () => {
       if (currentUser) {
         if (currentUser.isAvatarImageSet) {
+          if (currentUser.isGuest) {
+            setIsChatDataLoading(true);
+            setAllContacts(getGuestContacts());
+            setConversations(getGuestConversations());
+            setIsChatDataLoading(false);
+            return;
+          }
+
           try {
             setIsChatDataLoading(true);
             const [contactsResponse, conversationsResponse] = await Promise.all([
@@ -103,6 +124,21 @@ function Chat() {
 
   const refreshConversations = async (selectedUserId) => {
     if (!currentUser?._id) {
+      return;
+    }
+
+    if (currentUser.isGuest) {
+      const data = getGuestConversations();
+      setConversations(data);
+
+      if (selectedUserId) {
+        const updatedCurrentChat =
+          data.find((conversation) => conversation._id === selectedUserId) ||
+          getGuestContacts().find((contact) => contact._id === selectedUserId);
+        if (updatedCurrentChat) {
+          setCurrentChat(updatedCurrentChat);
+        }
+      }
       return;
     }
 
@@ -155,6 +191,7 @@ function Chat() {
             onBack={handleBackToContacts}
             onMessageSent={refreshConversations}
             isRecipientOnline={onlineUsers.includes(currentChat?._id)}
+            isGuestMode={Boolean(currentUser?.isGuest)}
           />
         )}
       </div>

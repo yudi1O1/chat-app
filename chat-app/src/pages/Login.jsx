@@ -3,11 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 // import styled from "styled-components";
 import Logo from "../assets/1chat.png";
 import "./pagesStyles.css";
-import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify"; //Toast is a new thing ****
 import axios from "axios";
 import { apiConfigurationError, loginRoute } from "../utils/Api.Routes";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
+import { createGuestUser, saveGuestUser } from "../utils/guestMode";
 
 function Login() {
   const navigate = useNavigate();
@@ -20,6 +20,7 @@ function Login() {
     confermPassword: "",
   });
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toastOption = {
     position: "bottom-right",
@@ -31,6 +32,10 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
+
     if (handleValidation()) {
       if (apiConfigurationError) {
         toast.error(apiConfigurationError, toastOption);
@@ -38,6 +43,7 @@ function Login() {
       }
 
       try {
+        setIsSubmitting(true);
         const { password, email } = values;
         const { data } = await axios.post(loginRoute, {
           email,
@@ -49,6 +55,7 @@ function Login() {
         }
 
         if (data.success === true) {
+          toast.success("Logged in successfully", toastOption);
           localStorage.setItem("chat-app-user", JSON.stringify(data.user));
           navigate("/");
         }
@@ -63,6 +70,8 @@ function Login() {
           error.response?.data?.message || "Unable to connect to the server",
           toastOption
         );
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -86,6 +95,13 @@ function Login() {
   // form value change ***
   const handleChange = (e) => {
     setValue({ ...values, [e.target.name]: e.target.value });
+  };
+
+  const loginAsGuest = () => {
+    const guestUser = createGuestUser();
+    saveGuestUser(guestUser);
+    toast.success("Guest mode enabled. Nothing will be saved to the database.", toastOption);
+    navigate("/");
   };
 
   useEffect(() => {
@@ -127,15 +143,23 @@ function Login() {
               </button>
             </div>
           </div>
-          <button type="submit" className="registerButton">
-            Login
+          <button type="submit" className="registerButton" disabled={isSubmitting}>
+            {isSubmitting ? "Logging in..." : "Login"}
           </button>
+          <button
+            type="button"
+            className="registerButton registerButton--secondary"
+            onClick={loginAsGuest}
+            disabled={isSubmitting}
+          >
+            Login as guest
+          </button>
+          <p className="formHint">Guest mode keeps all chat changes local to this browser only.</p>
           <span className="rspan">
             dont have a account? <Link to="/register">register</Link>
           </span>
         </form>
       </div>
-      <ToastContainer />
     </>
   );
 }

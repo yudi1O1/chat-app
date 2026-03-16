@@ -8,6 +8,11 @@ import {
 } from "../utils/Api.Routes";
 import DefaultAvatar from "../assets/default-avatar.svg";
 import { IoChevronBack } from "react-icons/io5";
+import {
+  addGuestMessage,
+  buildGuestAutoReply,
+  getGuestMessages,
+} from "../utils/guestMode";
 
 function formatPresence(currentChat, isRecipientOnline) {
   if (!currentChat) {
@@ -42,6 +47,7 @@ function ChatContainer({
   onBack,
   onMessageSent,
   isRecipientOnline,
+  isGuestMode,
 }) {
   const [messages, setMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
@@ -54,6 +60,13 @@ function ChatContainer({
 
     const fetchMessages = async () => {
       if (!currentChatId || !currentUserId) return;
+      if (isGuestMode) {
+        if (isMounted) {
+          setMessages(getGuestMessages(currentChatId));
+        }
+        return;
+      }
+
       try {
         const response = await axios.get(getAllMessageRoute, {
           params: { from: currentUserId, to: currentChatId },
@@ -68,7 +81,7 @@ function ChatContainer({
 
     fetchMessages();
 
-    if (!isSocketEnabled) {
+    if (!isSocketEnabled && !isGuestMode) {
       const intervalId = setInterval(fetchMessages, 4000);
       return () => {
         isMounted = false;
@@ -79,11 +92,24 @@ function ChatContainer({
     return () => {
       isMounted = false;
     };
-  }, [currentChatId, currentUserId]);
+  }, [currentChatId, currentUserId, isGuestMode]);
 
   const handleSendMsg = async (msg) => {
     if (!msg.trim()) return;
     try {
+      if (isGuestMode) {
+        addGuestMessage(currentChatId, { fromSelf: true, message: msg });
+        setMessages(getGuestMessages(currentChatId));
+        onMessageSent?.(currentChatId);
+
+        window.setTimeout(() => {
+          addGuestMessage(currentChatId, buildGuestAutoReply(currentChatId, msg));
+          setMessages(getGuestMessages(currentChatId));
+          onMessageSent?.(currentChatId);
+        }, 800);
+        return;
+      }
+
       await axios.post(sendMessageRoute, {
         messages: msg,
         from: currentUserId,
@@ -127,7 +153,7 @@ function ChatContainer({
         activeSocket.off("msg-recieve", handleMessageReceive);
       };
     }
-  }, [socket, currentChat, onMessageSent]);
+  }, [socket, currentChat, onMessageSent, isGuestMode]);
 
   useEffect(() => {
     if (arrivalMessage) {

@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./pagesStyles.css";
 import loader from "../assets/loader.gif";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import axios from "axios";
 import multiavatar from "@multiavatar/multiavatar/esm";
 import { setAvatarRoute } from "../utils/Api.Routes";
@@ -33,6 +32,16 @@ function SetAvatar() {
       toast.error("Please select a profile picture", toastOption);
     } else {
       const user = await JSON.parse(localStorage.getItem("chat-app-user"));
+      if (user?.isGuest) {
+        user.isAvatarImageSet = true;
+        user.avatarImage = avatars[selectedAvatar];
+        localStorage.setItem("chat-app-user", JSON.stringify(user));
+        localStorage.setItem("selectedAvatar", selectedAvatar);
+        toast.success("Guest avatar updated for this browser session", toastOption);
+        navigate("/");
+        return;
+      }
+
       try {
         const { data } = await axios.post(`${setAvatarRoute}/${user._id}`, {
           image: avatars[selectedAvatar], // This is now a base64 SVG string
@@ -45,6 +54,7 @@ function SetAvatar() {
 
           // Save selected avatar index too
           localStorage.setItem("selectedAvatar", selectedAvatar);
+          toast.success("Profile picture updated", toastOption);
 
           navigate("/");
         } else {
@@ -113,7 +123,6 @@ function SetAvatar() {
           </button>
         </div>
       )}
-      <ToastContainer />
     </>
   );
 }

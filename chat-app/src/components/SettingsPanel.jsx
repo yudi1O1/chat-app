@@ -4,6 +4,7 @@ import axios from "axios";
 import { IoClose } from "react-icons/io5";
 import { updateSettingsRoute } from "../utils/Api.Routes";
 import DefaultAvatar from "../assets/default-avatar.svg";
+import { toast } from "react-toastify";
 
 function SettingsPanel({ currentUser, isOpen, onClose, onUserUpdated }) {
   const navigate = useNavigate();
@@ -41,6 +42,25 @@ function SettingsPanel({ currentUser, isOpen, onClose, onUserUpdated }) {
   const handleSave = async () => {
     try {
       setIsSaving(true);
+      if (currentUser.isGuest) {
+        const updatedGuestUser = {
+          ...currentUser,
+          about,
+          settings: {
+            ...currentUser.settings,
+            lastSeenVisibility,
+            profilePhotoVisibility,
+            readReceipts,
+            notifications,
+          },
+        };
+        localStorage.setItem("chat-app-user", JSON.stringify(updatedGuestUser));
+        onUserUpdated(updatedGuestUser);
+        toast.success("Guest settings saved locally");
+        onClose();
+        return;
+      }
+
       const { data } = await axios.put(`${updateSettingsRoute}/${currentUser._id}`, {
         about,
         lastSeenVisibility,
@@ -52,6 +72,7 @@ function SettingsPanel({ currentUser, isOpen, onClose, onUserUpdated }) {
       if (data.success) {
         localStorage.setItem("chat-app-user", JSON.stringify(data.user));
         onUserUpdated(data.user);
+        toast.success("Settings updated");
         onClose();
       }
     } catch (error) {

@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 // import styled from "styled-components";
 import Logo from "../assets/1chat.png";
 import "./pagesStyles.css";
-import { ToastContainer, toast } from "react-toastify"; //Toast is a new thing ****
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify"; //Toast is a new thing ****
 import axios from "axios";
 import { apiConfigurationError, registerRoute } from "../utils/Api.Routes";
 import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
@@ -21,6 +20,7 @@ function Register() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toastOption = {
     position: "bottom-right",
@@ -32,6 +32,9 @@ function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (isSubmitting) {
+      return;
+    }
 
     if (handleValidation()) {
       if (apiConfigurationError) {
@@ -40,6 +43,7 @@ function Register() {
       }
 
       try {
+        setIsSubmitting(true);
         const { data } = await axios.post(registerRoute, values);
 
         if (data.success === false) {
@@ -47,6 +51,7 @@ function Register() {
         }
 
         if (data.success === true) {
+          toast.success("Registration successful", toastOption);
           localStorage.setItem("chat-app-user", JSON.stringify(data.user));
           navigate("/setavatar");
         }
@@ -61,6 +66,8 @@ function Register() {
           error.response?.data?.message || "Unable to connect to the server",
           toastOption
         );
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
@@ -144,15 +151,14 @@ function Register() {
               </button>
             </div>
           </div>
-          <button type="submit" className="registerButton">
-            create user
+          <button type="submit" className="registerButton" disabled={isSubmitting}>
+            {isSubmitting ? "Creating user..." : "create user"}
           </button>
           <span className="rspan">
             Already have an account? <Link to="/login">Login</Link>
           </span>
         </form>
       </div>
-      <ToastContainer />
     </>
   );
 }
