@@ -5,9 +5,10 @@ function getApiHost() {
   }
 
   if (typeof window !== "undefined" && window.location.hostname !== "localhost") {
-    throw new Error(
+    console.error(
       "Missing REACT_APP_API_URL. Set it to your backend URL before deploying the frontend."
     );
+    return window.location.origin;
   }
 
   return "http://localhost:8080";
