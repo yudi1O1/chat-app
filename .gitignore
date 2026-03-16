@@ -1,0 +1,10 @@
+.env
+.env.*
+server/.env
+server/.env.*
+chat-app/.env
+chat-app/.env.*
+node_modules/
+chat-app/node_modules/
+server/node_modules/
+chat-app/build/

@@ -10,8 +10,8 @@ function getAllowedOrigins() {
     process.env.FRONTEND_URL ||
     process.env.FRONTEND_ORIGIN;
 
-  if (!configuredOrigins) {
-    return ["http://localhost:3000"];
+  if (!configuredOrigins || configuredOrigins === "*") {
+    return "*";
   }
 
   return configuredOrigins
@@ -25,6 +25,10 @@ function createCorsOptions() {
 
   return {
     origin(origin, callback) {
+      if (allowedOrigins === "*") {
+        return callback(null, true);
+      }
+
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
