@@ -1,38 +1,11 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const userRoute = require("./routes/userRoutes");
-const messageRoute = require("./routes/messagesRoute");
 const User = require("./model/userModel");
 const { Server } = require("socket.io");
+const connectToDatabase = require("./db");
+const { app, createCorsOptions, getAllowedOrigins } = require("./app");
 require("dotenv").config();
 
-const app = express();
 const onlineUsers = new Map();
 const DEFAULT_PORT = 8080;
-const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || "http://localhost:3000";
-
-app.disable("x-powered-by");
-app.use(
-  cors({
-    origin: CLIENT_ORIGIN,
-    credentials: true,
-  })
-);
-app.use(express.json());
-app.use("/api/auth", userRoute);
-app.use("/api/messages", messageRoute);
-app.get("/health", (_req, res) => {
-  res.status(200).json({ ok: true });
-});
-
-app.use((err, _req, res, _next) => {
-  console.error("Unhandled application error:", err);
-  res.status(500).json({
-    success: false,
-    message: "Internal server error",
-  });
-});
 
 function getPort() {
   const parsedPort = Number(process.env.port || process.env.PORT || DEFAULT_PORT);
@@ -40,12 +13,7 @@ function getPort() {
 }
 
 async function startServer() {
-  if (!process.env.mongo_url) {
-    throw new Error("Missing required environment variable: mongo_url");
-  }
-
-  await mongoose.connect(process.env.mongo_url);
-  console.log("DB connection successful");
+  await connectToDatabase();
 
   const port = getPort();
   const server = app.listen(port, () => {
@@ -58,11 +26,10 @@ async function startServer() {
   });
 
   const io = new Server(server, {
-    cors: {
-      origin: CLIENT_ORIGIN,
-      credentials: true,
-    },
+    cors: createCorsOptions(),
   });
+
+  console.log(`Socket.IO enabled for origins: ${getAllowedOrigins().join(", ")}`);
 
   const broadcastOnlineUsers = () => {
     io.emit("online-users", Array.from(onlineUsers.keys()));

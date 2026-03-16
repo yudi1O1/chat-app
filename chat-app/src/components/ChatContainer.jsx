@@ -1,7 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import ChatInput from "./ChatInput";
 import axios from "axios";
-import { sendMessageRoute, getAllMessageRoute } from "../utils/Api.Routes";
+import {
+  sendMessageRoute,
+  getAllMessageRoute,
+  isSocketEnabled,
+} from "../utils/Api.Routes";
 import DefaultAvatar from "../assets/default-avatar.svg";
 import { IoChevronBack } from "react-icons/io5";
 
@@ -42,37 +46,58 @@ function ChatContainer({
   const [messages, setMessages] = useState([]);
   const [arrivalMessage, setArrivalMessage] = useState(null);
   const scrollRef = useRef();
+  const currentChatId = currentChat?._id;
+  const currentUserId = currentUser?._id;
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchMessages = async () => {
-      if (!currentChat || !currentUser?._id) return;
+      if (!currentChatId || !currentUserId) return;
       try {
         const response = await axios.get(getAllMessageRoute, {
-          params: { from: currentUser._id, to: currentChat._id },
+          params: { from: currentUserId, to: currentChatId },
         });
-        setMessages(response.data);
+        if (isMounted) {
+          setMessages(response.data);
+        }
       } catch (error) {
         console.error("Error fetching messages:", error);
       }
     };
+
     fetchMessages();
-  }, [currentChat, currentUser]);
+
+    if (!isSocketEnabled) {
+      const intervalId = setInterval(fetchMessages, 4000);
+      return () => {
+        isMounted = false;
+        clearInterval(intervalId);
+      };
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [currentChatId, currentUserId]);
 
   const handleSendMsg = async (msg) => {
     if (!msg.trim()) return;
     try {
       await axios.post(sendMessageRoute, {
         messages: msg,
-        from: currentUser._id,
-        to: currentChat._id,
+        from: currentUserId,
+        to: currentChatId,
       });
-      socket.current.emit("send-msg", {
-        message: msg,
-        from: currentUser._id,
-        to: currentChat._id,
-      });
+      if (socket.current) {
+        socket.current.emit("send-msg", {
+          message: msg,
+          from: currentUserId,
+          to: currentChatId,
+        });
+      }
       setMessages((prev) => [...prev, { fromSelf: true, message: msg }]);
-      onMessageSent?.(currentChat._id);
+      onMessageSent?.(currentChatId);
     } catch (error) {
       console.error("Error sending message:", error);
     }

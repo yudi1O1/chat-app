@@ -5,6 +5,7 @@ import {
   allUsersRoute,
   conversationsRoute,
   host,
+  isSocketEnabled,
 } from "../utils/Api.Routes";
 import Contact from "../components/Contact";
 import Welcome from "../components/Welcome";
@@ -48,7 +49,7 @@ function Chat() {
   };
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && isSocketEnabled) {
       socket.current = io(host);
       socket.current.emit("add-user", currentUser._id);
 
@@ -61,6 +62,9 @@ function Chat() {
         socket.current?.disconnect();
       };
     }
+
+    socket.current = undefined;
+    setOnlineUsers([]);
   }, [currentUser]);
 
   useEffect(() => {
