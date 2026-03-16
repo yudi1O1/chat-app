@@ -117,7 +117,7 @@ function Login() {
         <form className="form" onSubmit={(event) => handleSubmit(event)}>
           <div className="brand">
             <img src={Logo} alt="" className="brandLogo" />
-            <h1>one-chat</h1>
+            <h1 className="wordmark">ONE-CHAT</h1>
           </div>
           <div className="inputContainer">
             <input

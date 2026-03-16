@@ -116,12 +116,32 @@ img {
   gap: 0.85rem;
   padding-bottom: 0.5rem;
   color: var(--text-main);
-  font-family: "Space Grotesk", sans-serif;
 }
 
 .brand h1 {
   margin: 0;
   font-size: clamp(1.35rem, 4vw, 1.8rem);
+}
+
+.wordmark {
+  margin: 0;
+  color: #f7fbf2;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 0.95;
+  text-shadow:
+    -1px -1px 0 #1e7e52,
+    1px -1px 0 #1e7e52,
+    -1px 1px 0 #1e7e52,
+    1px 1px 0 #1e7e52,
+    0 2px 0 rgba(7, 56, 34, 0.95),
+    2px 3px 0 rgba(7, 56, 34, 0.7);
+}
+
+.wordmark--compact {
+  font-size: 1rem;
 }
 
 .brandLogo {
@@ -365,7 +385,6 @@ img {
 }
 
 .brand-mark h3 {
-  font-family: "Space Grotesk", sans-serif;
   font-size: 1.15rem;
 }
 

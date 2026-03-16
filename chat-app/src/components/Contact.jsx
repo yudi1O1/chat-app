@@ -43,7 +43,7 @@ function Contact({
             <div className="brand-mark">
               <img src={Logo} alt="logo" />
               <div>
-                <h3>one-chat</h3>
+                <h3 className="wordmark wordmark--compact">ONE-CHAT</h3>
                 <p>{contacts.length} recent chat{contacts.length === 1 ? "" : "s"}</p>
               </div>
             </div>
